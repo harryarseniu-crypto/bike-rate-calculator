@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bike Shipping Savings Calculator</title>
+<style>
+  :root{
+    --bg:transparent;--surface:#fff;--surface-2:#eef3f6;--line:#dbe3e8;
+    --fg:#2b2926;--ink:#1c2053;--muted:#5c6670;
+    --accent:#00b5e2;--accent-soft:#d3f6ff;--good:#1f9d64;--good-soft:#dcf3e6;--warn:#b7791f;
+    --radius:14px;--shadow:0 1px 2px rgba(20,25,35,.05),0 10px 30px rgba(20,25,35,.08);
+    --font:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    --display:"Space Grotesk","Inter",system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+    --surface:#19212a;--surface-2:#222c36;--line:#303b47;--fg:#eef3f6;--ink:#bcd0ff;--muted:#95a3b0;
+    --accent:#2ec8ec;--accent-soft:#0b2d39;--good:#35c383;--good-soft:#163227;--warn:#e0ad5a;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px rgba(0,0,0,.4);color-scheme:dark;}}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg)}
+  body{font-family:var(--font);color:var(--fg);line-height:1.4;-webkit-font-smoothing:antialiased}
+  .widget{max-width:440px;margin:0 auto;padding:14px}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .head{padding:16px 16px 12px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,var(--accent-soft),transparent)}
+  .kicker{font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:.64rem;font-weight:700;color:var(--accent)}
+  .head h1{font-family:var(--display);font-size:1.12rem;line-height:1.18;margin:4px 0 0;color:var(--ink);text-wrap:balance}
+  .body{padding:14px 16px 16px}
+
+  /* chips (completed steps) */
+  .done{display:grid;gap:7px;margin-bottom:10px}
+  .chip{display:flex;align-items:center;gap:9px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;cursor:pointer}
+  .chip .ic{width:18px;height:18px;border-radius:50%;background:var(--good-soft);color:var(--good);display:grid;place-items:center;font-weight:800;font-size:.68rem;flex:none}
+  .chip .k{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .chip .v{font-weight:600;color:var(--fg);font-size:.9rem}
+  .chip .edit{margin-left:auto;font-size:.72rem;color:var(--accent);font-weight:600}
+
+  /* active step */
+  .q{font-family:var(--display);font-weight:600;font-size:.98rem;color:var(--ink);margin:2px 0 10px;display:flex;align-items:center;gap:9px}
+  .q .num{width:21px;height:21px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:.72rem;font-weight:700;flex:none}
+  label{display:block;font-size:.72rem;font-weight:600;color:var(--muted);margin:0 0 4px}
+  input,select{width:100%;font-family:var(--font);font-size:1rem;color:var(--fg);background:var(--surface-2);border:1.5px solid var(--line);border-radius:9px;padding:11px}
+  input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .hint{font-size:.7rem;color:var(--muted);margin:5px 0 0}
+  .btn{display:block;width:100%;margin-top:13px;text-align:center;background:var(--accent);color:#fff;font-weight:700;font-size:.98rem;padding:13px;border:none;border-radius:10px;cursor:pointer}
+  .btn:hover{filter:brightness(1.05)}
+  .err{color:var(--warn);font-size:.8rem;margin-top:7px}
+
+  /* results */
+  .savings{margin-bottom:12px;background:linear-gradient(180deg,var(--good-soft),transparent);border:1px solid var(--good);border-radius:12px;padding:16px;text-align:center}
+  .savings .big{font-family:var(--display);font-size:2.1rem;font-weight:700;color:var(--good);line-height:1}
+  .savings .lbl{color:var(--muted);font-size:.8rem;margin-top:5px}
+  .book{display:inline-block;margin-top:11px;background:var(--accent);color:#fff;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:9px;font-size:.9rem}
+  .rows{display:grid;gap:8px}
+  .row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .row.best{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+  .row .carrier{font-family:var(--display);font-weight:700;color:var(--ink);font-size:.96rem}
+  .row .svc{font-size:.68rem;color:var(--muted)}
+  .row .amt{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;font-size:1.15rem}
+  .row .amt small{display:block;font-weight:600;font-size:.64rem;color:var(--good)}
+  .row .amt.err{font-size:.76rem;font-weight:600;color:var(--warn)}
+  .pill{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 7px;vertical-align:1px}
+  .pill.est{background:var(--surface-2);color:var(--muted)}
+  .spinner{display:inline-block;width:15px;height:15px;border:2px solid var(--accent-soft);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .meta{font-size:.7rem;color:var(--muted);margin-top:11px;text-align:center;line-height:1.5}
+  .meta a{color:var(--accent)}
+  .restart{display:block;margin:10px auto 0;background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;font-size:.82rem}
+  .foot{padding:9px 16px;border-top:1px solid var(--line);font-size:.66rem;color:var(--muted);text-align:center}
+  .foot a{color:var(--accent);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="card">
+    <div class="head">
+      <div class="kicker">Bike shipping savings</div>
+      <h1>See how much you can save shipping your bike</h1>
+    </div>
+    <div class="body">
+      <div class="done" id="done"></div>
+      <div id="step"></div>
+      <div id="results"></div>
+    </div>
+    <div class="foot">Compare UPS, FedEx &amp; BikeFlights · book at <a id="footBook" href="https://www.bikeflights.com/ship" target="_blank" rel="noopener">bikeflights.com</a></div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+
+<script>
+// Where "Book it" sends people. Swap this for your BikeFlights affiliate link.
+const BOOK_URL = "https://www.bikeflights.com/ship";
+
+const BOXES = { bbs:{name:"Bike Box Small"}, bbm:{name:"Bike Box Medium"}, bbl:{name:"Bike Box Large"}, bbxl:{name:"Bike Box Extra Large"} };
+// Sample numbers used only when no live backend is reachable (e.g. on a static host).
+const SAMPLE = {
+  bbs:{fedex:182.40,ups:191.20,bf:96.50}, bbm:{fedex:261.96,ups:275.06,bf:148.99},
+  bbl:{fedex:338.70,ups:352.10,bf:188.00}, bbxl:{fedex:312.40,ups:328.90,bf:174.00},
+};
+function demoRates(){
+  const s = SAMPLE[state.box] || SAMPLE.bbm;
+  return { mode:"sample", route:{ fromZip:state.fromZip, toZip:state.toZip, boxName:BOXES[state.box].name },
+    bikeflights:{ rate:s.bf, serviceLevel:"BikeFlights Ground", estimate:true },
+    ups:{ rate:s.ups, serviceLevel:"UPS Ground (sample)", demo:true },
+    fedex:{ rate:s.fedex, serviceLevel:"FedEx Ground (sample)", demo:true } };
+}
+const state = { fromZip:"", toZip:"", box:"bbm", weight:"", contents:"Complete Bicycle" };
+let active = 0;
+const $ = (id) => document.getElementById(id);
+const money = (n) => n==null ? null : "$"+Number(n).toFixed(2);
+document.getElementById('footBook').href = BOOK_URL;
+
+const STEPS = [
+  { num:1, q:"Where are you shipping <b>from</b>?", chip:()=>["From", state.fromZip], focus:"f",
+    body:()=>`<label for="f">Ship from ZIP</label><input id="f" inputmode="numeric" maxlength="5" placeholder="e.g. 90210" value="${state.fromZip}">`,
+    get:()=>{ const v=$("f").value.trim(); if(!/^\d{5}$/.test(v)) return {err:"Enter a 5-digit ZIP."}; state.fromZip=v; return {ok:1}; } },
+  { num:2, q:"Where are you shipping <b>to</b>?", chip:()=>["To", state.toZip], focus:"t",
+    body:()=>`<label for="t">Ship to ZIP</label><input id="t" inputmode="numeric" maxlength="5" placeholder="e.g. 10001" value="${state.toZip}">`,
+    get:()=>{ const v=$("t").value.trim(); if(!/^\d{5}$/.test(v)) return {err:"Enter a 5-digit ZIP."}; state.toZip=v; return {ok:1}; } },
+  { num:3, q:"What are you shipping?", chip:()=>["Box", BOXES[state.box].name + (state.weight?(" · "+state.weight+" lb"):"")], focus:"bx",
+    body:()=>`<label for="bx">Bike box</label>
+      <select id="bx">
+        <option value="bbs"${state.box==='bbs'?' selected':''}>Bike Box Small — 43×10×24 in</option>
+        <option value="bbm"${state.box==='bbm'?' selected':''}>Bike Box Medium — 45×12×30 in</option>
+        <option value="bbl"${state.box==='bbl'?' selected':''}>Bike Box Large — 64×14×32 in</option>
+        <option value="bbxl"${state.box==='bbxl'?' selected':''}>Bike Box Extra Large — 56×21×32 in</option>
+      </select>
+      <div class="grid" style="margin-top:10px">
+        <div><label for="wt">Weight (lb)</label><input id="wt" inputmode="numeric" placeholder="auto" value="${state.weight}"></div>
+        <div><label for="ct">Contents</label><select id="ct">
+          ${["Complete Bicycle","Complete E-Bike With Battery Installed","Bicycle Frame","Bicycle Wheel(s)","Bicycle Parts (No Batteries)"].map(c=>`<option${c===state.contents?' selected':''}>${c}</option>`).join("")}
+        </select></div>
+      </div>
+      <p class="hint">Leave weight blank for a typical packed weight.</p>`,
+    get:()=>{ state.box=$("bx").value; state.weight=$("wt").value.trim(); state.contents=$("ct").value; return {ok:1}; } },
+];
+
+function postHeight(){ try{ parent.postMessage({ type:"bikeRateHeight", height: Math.ceil(document.documentElement.scrollHeight) }, "*"); }catch(e){} }
+
+function render(){
+  $("done").innerHTML = STEPS.slice(0, active).map((s,i)=>{ const [k,v]=s.chip();
+    return `<div class="chip" data-edit="${i}"><span class="ic">✓</span><span><span class="k">${k}</span><br><span class="v">${v||""}</span></span><span class="edit">Edit</span></div>`; }).join("");
+  document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{ active=+c.dataset.edit; $("results").innerHTML=""; render(); });
+
+  if(active < STEPS.length){
+    const s = STEPS[active];
+    $("step").innerHTML = `<div class="q"><span class="num">${s.num}</span><span>${s.q}</span></div>${s.body()}
+      <button class="btn" id="next">${active===STEPS.length-1 ? "See how much you can save →" : "Continue →"}</button>
+      <div class="err" id="err" hidden></div>`;
+    const el=$(s.focus); if(el) el.focus({preventScroll:true});
+    const go=()=>{ const r=s.get(); if(r.err){ $("err").textContent=r.err; $("err").hidden=false; postHeight(); return; } active++; render(); if(active>=STEPS.length) fetchRates(); };
+    $("next").onclick=go;
+    $("step").querySelectorAll("input").forEach(inp=>inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); go(); }}));
+  } else { $("step").innerHTML=""; }
+  postHeight();
+}
+
+async function fetchRates(){
+  $("results").innerHTML = `<div style="padding:16px 2px;color:var(--muted);font-size:.9rem"><span class="spinner"></span> Pulling live UPS &amp; FedEx rates…</div>`;
+  postHeight();
+  try{
+    const res = await fetch("/api/rates",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(state)});
+    if(!res.ok) throw new Error("no backend");
+    renderResults(await res.json());
+  }catch(e){
+    // No live backend (e.g. static hosting) — show sample rates so the widget still works.
+    renderResults(demoRates());
+  }
+}
+
+function row(label,r,bf,opts={}){
+  let amt;
+  if(r&&r.rate!=null){ const save=(bf&&bf.rate!=null)?(r.rate-bf.rate):null;
+    amt=`<div class="amt">${money(r.rate)}${save!=null&&save>0?`<small>save ${money(save)}</small>`:""}</div>`; }
+  else amt=`<div class="amt err">${(r&&r.error)||"No rate"}</div>`;
+  return `<div class="row${opts.best?' best':''}"><div><div class="carrier">${label}${opts.best?' <span class="pill">Your price</span>':''}${opts.est?' <span class="pill est">Est.</span>':''}</div>
+    <div class="svc">${(r&&r.serviceLevel)||"Ground"}</div></div>${amt}</div>`;
+}
+
+function renderResults(data){
+  const {bikeflights:bf,ups,fedex}=data; let html="";
+  const comps=[ups,fedex].filter(x=>x&&x.rate!=null).map(x=>x.rate);
+  if(bf&&bf.rate!=null&&comps.length){ const save=Math.min(...comps)-bf.rate;
+    if(save>0) html+=`<div class="savings"><div class="big">${money(save)}</div><div class="lbl">you save with BikeFlights vs UPS / FedEx (retail)</div>
+      <a class="book" href="${BOOK_URL}" target="_blank" rel="noopener">Book it on BikeFlights →</a></div>`; }
+  html+=`<div class="rows">${row("BikeFlights",bf,bf,{best:1,est:bf&&bf.estimate})}${row("UPS",ups,bf)}${row("FedEx",fedex,bf)}</div>`;
+  const r=data.route||{};
+  html+=`<p class="meta">${r.fromZip} → ${r.toZip} · ${r.boxName}${bf&&bf.estimate?" · BikeFlights estimated":""}</p>`;
+  if(data.mode==="sample") html+=`<p class="meta">Preview with sample rates — real UPS/FedEx rates appear once this runs on a live server.</p>`;
+  html+=`<button class="restart" id="restart">↺ Start over</button>`;
+  $("results").innerHTML=html;
+  $("restart").onclick=()=>{ active=0; $("results").innerHTML=""; render(); };
+  postHeight();
+}
+
+window.addEventListener("load", postHeight);
+window.addEventListener("resize", postHeight);
+render();
+</script>
+</body>
+</html>

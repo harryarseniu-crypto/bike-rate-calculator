@@ -95,6 +95,18 @@
 const BOOK_URL = "https://www.bikeflights.com/ship";
 
 const BOXES = { bbs:{name:"Bike Box Small"}, bbm:{name:"Bike Box Medium"}, bbl:{name:"Bike Box Large"}, bbxl:{name:"Bike Box Extra Large"} };
+// Sample numbers used only when no live backend is reachable (e.g. on a static host).
+const SAMPLE = {
+  bbs:{fedex:182.40,ups:191.20,bf:96.50}, bbm:{fedex:261.96,ups:275.06,bf:148.99},
+  bbl:{fedex:338.70,ups:352.10,bf:188.00}, bbxl:{fedex:312.40,ups:328.90,bf:174.00},
+};
+function demoRates(){
+  const s = SAMPLE[state.box] || SAMPLE.bbm;
+  return { mode:"sample", route:{ fromZip:state.fromZip, toZip:state.toZip, boxName:BOXES[state.box].name },
+    bikeflights:{ rate:s.bf, serviceLevel:"BikeFlights Ground", estimate:true },
+    ups:{ rate:s.ups, serviceLevel:"UPS Ground (sample)", demo:true },
+    fedex:{ rate:s.fedex, serviceLevel:"FedEx Ground (sample)", demo:true } };
+}
 const state = { fromZip:"", toZip:"", box:"bbm", weight:"", contents:"Complete Bicycle" };
 let active = 0;
 const $ = (id) => document.getElementById(id);
@@ -151,8 +163,12 @@ async function fetchRates(){
   postHeight();
   try{
     const res = await fetch("/api/rates",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(state)});
+    if(!res.ok) throw new Error("no backend");
     renderResults(await res.json());
-  }catch(e){ $("results").innerHTML=`<div class="err">Something went wrong: ${e.message||e}</div>`; postHeight(); }
+  }catch(e){
+    // No live backend (e.g. static hosting) — show sample rates so the widget still works.
+    renderResults(demoRates());
+  }
 }
 
 function row(label,r,bf,opts={}){
@@ -173,6 +189,7 @@ function renderResults(data){
   html+=`<div class="rows">${row("BikeFlights",bf,bf,{best:1,est:bf&&bf.estimate})}${row("UPS",ups,bf)}${row("FedEx",fedex,bf)}</div>`;
   const r=data.route||{};
   html+=`<p class="meta">${r.fromZip} → ${r.toZip} · ${r.boxName}${bf&&bf.estimate?" · BikeFlights estimated":""}</p>`;
+  if(data.mode==="sample") html+=`<p class="meta">Preview with sample rates — real UPS/FedEx rates appear once this runs on a live server.</p>`;
   html+=`<button class="restart" id="restart">↺ Start over</button>`;
   $("results").innerHTML=html;
   $("restart").onclick=()=>{ active=0; $("results").innerHTML=""; render(); };
