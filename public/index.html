@@ -55,9 +55,10 @@
   .err{color:var(--warn);font-size:.8rem;margin-top:7px}
 
   /* results */
-  .savings{margin-bottom:12px;background:linear-gradient(180deg,var(--good-soft),transparent);border:1px solid var(--good);border-radius:12px;padding:16px;text-align:center}
-  .savings .big{font-family:var(--display);font-size:2.1rem;font-weight:700;color:var(--good);line-height:1}
-  .savings .lbl{color:var(--muted);font-size:.8rem;margin-top:5px}
+  .savings{margin-bottom:11px;background:linear-gradient(180deg,var(--good-soft),transparent);border:1px solid var(--good);border-radius:12px;padding:14px;text-align:center}
+  .savings .slabel{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.1em;font-size:.72rem;color:var(--good)}
+  .savings .big{font-family:var(--display);font-size:2rem;font-weight:800;color:var(--good);line-height:1.05}
+  .savings .lbl{color:var(--muted);font-size:.78rem;margin-top:3px}
   .book{display:inline-block;margin-top:11px;background:var(--accent);color:#fff;font-family:var(--display);font-weight:700;text-decoration:none;padding:11px 22px;border-radius:999px;font-size:.9rem;box-shadow:0 4px 14px rgba(0,181,226,.3)}
   .rows{display:grid;gap:8px}
   .row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
@@ -149,12 +150,17 @@ const STEPS = [
     get:()=>{ state.box=$("bx").value; state.weight=$("wt").value.trim(); state.contents=$("ct").value; return {ok:1}; } },
 ];
 
+function summary(){
+  const ft = state.fromZip ? (state.fromZip + (active>=2 && state.toZip ? " → "+state.toZip : "")) : "";
+  const bx = active>=3 ? (BOXES[state.box].name + (state.weight ? " · "+state.weight+" lb" : "")) : "";
+  return [ft,bx].filter(Boolean).join(" · ");
+}
 function postHeight(){ try{ parent.postMessage({ type:"bikeRateHeight", height: Math.ceil(document.documentElement.scrollHeight) }, "*"); }catch(e){} }
 
 function render(){
-  $("done").innerHTML = STEPS.slice(0, active).map((s,i)=>{ const [k,v]=s.chip();
-    return `<div class="chip" data-edit="${i}"><span class="ic">✓</span><span><span class="k">${k}</span><br><span class="v">${v||""}</span></span><span class="edit">Edit</span></div>`; }).join("");
-  document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{ active=+c.dataset.edit; $("results").innerHTML=""; render(); });
+  const sum = summary();
+  $("done").innerHTML = (active>0 && sum) ? `<div class="chip" id="editAll"><span class="ic">✓</span><span class="v">${sum}</span><span class="edit">Edit</span></div>` : "";
+  const ea=$("editAll"); if(ea) ea.onclick=()=>{ active=0; $("results").innerHTML=""; render(); };
 
   if(active < STEPS.length){
     const s = STEPS[active];
@@ -195,7 +201,7 @@ function renderResults(data){
   const {bikeflights:bf,ups,fedex}=data; let html="";
   const comps=[ups,fedex].filter(x=>x&&x.rate!=null).map(x=>x.rate);
   if(bf&&bf.rate!=null&&comps.length){ const save=Math.min(...comps)-bf.rate;
-    if(save>0) html+=`<div class="savings"><div class="big">${money(save)}</div><div class="lbl">you save with BikeFlights vs UPS / FedEx (retail)</div>
+    if(save>0) html+=`<div class="savings"><div class="slabel">You Save</div><div class="big">${money(save)}</div><div class="lbl">with BikeFlights vs UPS / FedEx retail</div>
       <a class="book" href="${BOOK_URL}" target="_blank" rel="noopener">Book it on BikeFlights →</a></div>`; }
   html+=`<div class="rows">${row("BikeFlights",bf,bf,{best:1,est:bf&&bf.estimate})}${row("UPS",ups,bf)}${row("FedEx",fedex,bf)}</div>`;
   const r=data.route||{};
