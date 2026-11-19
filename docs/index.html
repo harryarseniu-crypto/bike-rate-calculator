@@ -23,11 +23,15 @@
   .widget{max-width:440px;margin:0 auto;padding:14px}
 
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-  .head{padding:18px 18px 15px;border-bottom:1px solid var(--line);
-    background:linear-gradient(135deg,var(--accent) 0%,#0a8fc0 100%);position:relative;overflow:hidden}
+  .head{padding:16px 18px 15px;border-bottom:1px solid var(--line);
+    background:linear-gradient(135deg,var(--accent) 0%,#0a8fc0 100%);position:relative;overflow:hidden;
+    display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .head .htext{min-width:0;position:relative;z-index:1}
   .head .kicker{font-family:var(--display);text-transform:uppercase;letter-spacing:.14em;font-size:.64rem;font-weight:700;color:#d8f6ff;display:flex;align-items:center;gap:6px}
-  .head h1{font-family:var(--display);font-weight:800;font-size:1.2rem;line-height:1.16;margin:5px 0 0;color:#fff;text-wrap:balance;letter-spacing:-.01em}
-  .head::after{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.08)}
+  .head h1{font-family:var(--display);font-weight:800;font-size:1.18rem;line-height:1.16;margin:5px 0 0;color:#fff;text-wrap:balance;letter-spacing:-.01em}
+  .head .hlogo{flex:none;position:relative;z-index:1;background:#fff;border-radius:9px;padding:6px 8px;line-height:0;box-shadow:0 2px 8px rgba(0,0,0,.14);display:block}
+  .head .hlogo img{height:16px;display:block}
+  .head::after{content:"";position:absolute;right:-30px;bottom:-40px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.1)}
   .body{padding:14px 16px 16px}
 
   /* chips (completed steps) */
@@ -78,8 +82,13 @@
 <div class="widget">
   <div class="card">
     <div class="head">
-      <div class="kicker">🚲 Bike Shipping Savings</div>
-      <h1>See How Much You Can Save Shipping Your Bike</h1>
+      <div class="htext">
+        <div class="kicker">Bike Shipping Savings</div>
+        <h1>See How Much You Can Save Shipping Your Bike</h1>
+      </div>
+      <a class="hlogo" href="https://www.bikeflights.com" target="_blank" rel="noopener" aria-label="BikeFlights">
+        <img src="https://res.cloudinary.com/dylqiddds/image/upload/f_auto,q_80,w_505,h_96/bikeflights/logos/BF_horizontallogo.webp" alt="BikeFlights">
+      </a>
     </div>
     <div class="body">
       <div class="done" id="done"></div>
