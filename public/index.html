@@ -60,13 +60,13 @@
   .savings .big{font-family:var(--display);font-size:2rem;font-weight:800;color:var(--good);line-height:1.05}
   .savings .lbl{color:var(--muted);font-size:.78rem;margin-top:3px}
   .book{display:inline-block;margin-top:11px;background:var(--accent);color:#fff;font-family:var(--display);font-weight:700;text-decoration:none;padding:11px 22px;border-radius:999px;font-size:.9rem;box-shadow:0 4px 14px rgba(0,181,226,.3)}
-  .rows{display:grid;gap:8px}
-  .row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .rows{display:grid;gap:6px}
+  .row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 12px}
   .row.best{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
-  .row .carrier{font-family:var(--display);font-weight:700;color:var(--ink);font-size:.96rem}
-  .row .svc{font-size:.68rem;color:var(--muted)}
-  .row .amt{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;font-size:1.15rem}
-  .row .amt small{display:block;font-weight:600;font-size:.64rem;color:var(--good)}
+  .row .carrier{font-family:var(--display);font-weight:700;color:var(--ink);font-size:.9rem;line-height:1.2}
+  .row .svc{font-size:.66rem;color:var(--muted);line-height:1.2}
+  .row .amt{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;font-size:1.08rem;line-height:1.1}
+  .row .amt small{display:block;font-weight:600;font-size:.62rem;color:var(--good);margin-top:1px}
   .row .amt.err{font-size:.76rem;font-weight:600;color:var(--warn)}
   .pill{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 7px;vertical-align:1px}
   .pill.est{background:var(--surface-2);color:var(--muted)}
@@ -204,9 +204,7 @@ function renderResults(data){
     if(save>0) html+=`<div class="savings"><div class="slabel">You Save</div><div class="big">${money(save)}</div><div class="lbl">with BikeFlights vs UPS / FedEx retail</div>
       <a class="book" href="${BOOK_URL}" target="_blank" rel="noopener">Book it on BikeFlights →</a></div>`; }
   html+=`<div class="rows">${row("BikeFlights",bf,bf,{best:1,est:bf&&bf.estimate})}${row("UPS",ups,bf)}${row("FedEx",fedex,bf)}</div>`;
-  const r=data.route||{};
-  html+=`<p class="meta">${r.fromZip} → ${r.toZip} · ${r.boxName}${bf&&bf.estimate?" · BikeFlights estimated":""}</p>`;
-  if(data.mode==="sample") html+=`<p class="meta">Preview with sample rates — real UPS/FedEx rates appear once this runs on a live server.</p>`;
+  if(data.mode==="sample") html+=`<p class="meta">Sample rates — live rates appear once hosted on a server.</p>`;
   html+=`<button class="restart" id="restart">↺ Start over</button>`;
   $("results").innerHTML=html;
   $("restart").onclick=()=>{ active=0; $("results").innerHTML=""; render(); };
