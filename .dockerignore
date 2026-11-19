@@ -1,0 +1,7 @@
+node_modules
+.env
+scrape-screenshots
+*.log
+ep-test.mjs
+carriers.mjs
+.git

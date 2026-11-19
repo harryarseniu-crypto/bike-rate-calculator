@@ -1,0 +1,15 @@
+{
+  "name": "bike-rate-calculator",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "description": "Live bike-shipping rate calculator — compares UPS, FedEx and BikeFlights ground rates and shows the savings.",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --env-file-if-exists=.env server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "playwright": "1.57.0"
+  }
+}

@@ -1,0 +1,20 @@
+# One-click deploy to Render (free Node host). Keys are set in the Render dashboard,
+# never committed. https://render.com → New → Blueprint → pick this repo.
+services:
+  - type: web
+    name: bike-rate-calculator
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: EASYPOST_API_KEY
+        sync: false        # paste your EZTK… (test) or EZAK… (prod) key in the dashboard
+      - key: UPS_CLIENT_ID
+        sync: false        # paste after UPS verifies your account
+      - key: UPS_CLIENT_SECRET
+        sync: false
+      - key: UPS_ACCOUNT
+        value: "30C59E"
+      - key: UPS_ENV
+        value: "cie"
